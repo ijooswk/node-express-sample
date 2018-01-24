@@ -1,0 +1,60 @@
+const express = require('express'),
+    hbs = require('hbs'),
+    fs = require('fs');
+
+var app = express();
+var maintenance_flag = false;
+
+//using partials
+hbs.registerPartials(__dirname + '/views/partials');
+hbs.registerHelper('getCurrentYear', ()=>{
+    return new Date().getFullYear();
+});
+
+hbs.registerHelper('screamIt', (text) => {
+    return text.toUpperCase();
+});
+
+//middle ware 
+app.set('view engine','hbs');
+
+app.use((req, res, next) => {
+    var now = new Date().toString();
+    var log = `${now}: ${req.method} ${req.url}\n`;
+
+    fs.appendFile('nodeserver.log', log, (err) =>{
+        if(err) console.log('Unable to append log to the file');
+    });
+    next();
+});
+
+if(maintenance_flag){
+    app.use((req, res, next) => {
+        res.render('maintenance.hbs');
+    });
+}
+
+app.use(express.static(__dirname + '/public'));
+
+app.get('/', (req, res)=>{
+    let welcomemsg ='Welcome to the website of the Sehun node project';
+    let pageTitle = 'Home Page';
+    res.render('home.hbs',{
+        welcomemsg,
+        pageTitle
+    })
+});
+
+app.get('/about', (req, res)=>{
+    res.render('about.hbs', {
+        pageTitle: 'About Page'
+    });
+});
+
+app.get('/*', (req, res)=>{
+    res.status(404).send('Page Not found');
+});
+
+app.listen(3000, () =>{
+    console.log('Server is up on port 3000');
+});
