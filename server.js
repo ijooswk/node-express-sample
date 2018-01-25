@@ -5,6 +5,8 @@ const express = require('express'),
 var app = express();
 var maintenance_flag = false;
 
+const port = process.env.port;
+
 //using partials
 hbs.registerPartials(__dirname + '/views/partials');
 hbs.registerHelper('getCurrentYear', ()=>{
@@ -55,6 +57,7 @@ app.get('/*', (req, res)=>{
     res.status(404).send('Page Not found');
 });
 
-app.listen(3000, () =>{
-    console.log('Server is up on port 3000');
+//using heroku port
+app.listen(port, () =>{
+    console.log(`Server is up on port ${port}`);
 });
